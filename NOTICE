@@ -1,0 +1,14 @@
+pstack-pi is an independent Pi-native adaptation.
+
+Original pstack: Lauren Tan, copyright (c) 2026, MIT.
+https://github.com/cursor/plugins/tree/main/pstack
+
+Reference adaptation: ScriptedAlchemy/pstack-codex, MIT.
+https://github.com/ScriptedAlchemy/pstack-codex
+Pinned commit: c25afa251f1513b0b28cc089294d468c5e350444
+
+Thirty portable skills are retained with invocation and runtime-link changes.
+Eleven workflows and the extension runtime are Pi-native implementations.
+See UPSTREAM.json and PARITY.md for provenance and scope.
+
+This project is not an official Cursor, OpenAI, ScriptedAlchemy, or Pi release.

@@ -1,0 +1,30 @@
+{
+  "name": "pstack-pi",
+  "version": "0.1.0",
+  "description": "Pstack engineering workflows and bounded review agents for Pi",
+  "type": "module",
+  "license": "MIT",
+  "keywords": ["pi-package", "pstack", "coding-agent"],
+  "engines": { "node": ">=22" },
+  "files": ["extensions", "src", "skills", "agents", "PI.md", "PARITY.md", "UPSTREAM.json", "NOTICE", "LICENSE"],
+  "pi": {
+    "extensions": ["./extensions/pstack.ts"],
+    "skills": ["./skills"]
+  },
+  "scripts": {
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "validate": "npm run typecheck && npm test",
+    "smoke": "tsx scripts/smoke.ts"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-ai": "*",
+    "typebox": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}
