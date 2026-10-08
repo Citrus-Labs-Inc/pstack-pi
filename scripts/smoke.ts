@@ -30,7 +30,7 @@ try {
   assert.ok(extension.commands.has("pstack"));
   const skills = loadSkillsFromDir({ dir: join(staged, "skills"), source: "smoke" });
   assert.deepEqual(skills.diagnostics, []);
-  assert.equal(skills.skills.length, 41);
+  assert.equal(skills.skills.length, 43);
 
   const help = spawnSync(command, ["--offline", "--no-extensions", "--no-skills", "--no-context-files", "--no-approve", "-e", staged, "--help"], {
     cwd: dir, encoding: "utf8", timeout: 30_000, env: process.env,
@@ -95,7 +95,7 @@ try {
   assert.equal(calls, 2);
   assert.equal(readVerified, true);
   assert.equal(result.output, "Verified PSTACK_SMOKE_SENTINEL with the read tool.");
-  console.log("PASS: Pi loaded the extension, CLI flag, and 41 skills; a real Pi child completed a read-tool round trip against a local fixture provider. No paid API calls.");
+  console.log("PASS: Pi loaded the extension, CLI flag, and 43 skills; a real Pi child completed a read-tool round trip against a local fixture provider. No paid API calls.");
 } finally {
   server?.closeAllConnections();
   if (server?.listening) await new Promise<void>(resolve => server!.close(() => resolve()));

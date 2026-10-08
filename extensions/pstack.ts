@@ -67,7 +67,7 @@ export default function pstack(pi: ExtensionAPI) {
   });
 
   pi.registerCommand("pstack", {
-    description: "Pstack mode: on, off, status, models, help",
+    description: "Pstack mode: on, off, status, models, herdr, help",
     handler: async (args, ctx) => {
       switch (args.trim() || "status") {
         case "on": case "off":
@@ -84,8 +84,20 @@ export default function pstack(pi: ExtensionAPI) {
           report(ctx, models.map(m => `${m.provider}/${m.id}`).join("\n") || "No authenticated models available. Use /login and /model.");
           return;
         }
+        case "herdr":
+          if (process.env.HERDR_ENV !== "1") {
+            report(ctx, "Herdr: unmanaged (HERDR_ENV is not 1). No Herdr session was inspected.");
+            return;
+          }
+          report(ctx, [
+            "Herdr: managed (HERDR_ENV=1).",
+            `HERDR_WORKSPACE_ID=${process.env.HERDR_WORKSPACE_ID ?? "(unset)"}`,
+            `HERDR_TAB_ID=${process.env.HERDR_TAB_ID ?? "(unset)"}`,
+            `HERDR_PANE_ID=${process.env.HERDR_PANE_ID ?? "(unset)"}`,
+          ].join("\n"));
+          return;
         case "help":
-          report(ctx, "/pstack on|off|status|models\n/skill:setup-pstack\n/skill:poteto-help\n/skill:how <question>\n/skill:interrogate <scope>\nReview agents are read-only, bounded, and may incur model costs. Scheduling and writing subagents are not included.");
+          report(ctx, "/pstack on|off|status|models\n/pstack herdr\n/skill:setup-pstack\n/skill:poteto-help\n/skill:how <question>\n/skill:interrogate <scope>\n/skill:pstack-herdr <operation>\n/skill:pstack-herdr-swarm <task>\npstack_review agents are bounded and read-only. Persistent or writing Herdr agents require a separately installed Herdr.");
           return;
         default:
           report(ctx, "Unknown pstack command. Use /pstack help or /skill:<name>.");

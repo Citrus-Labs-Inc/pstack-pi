@@ -23,7 +23,9 @@ Load each applicable skill by reading its SKILL.md relative to this directory. D
 | Understand a subsystem or choose where code belongs | `../how/SKILL.md` |
 | Explain motivation or historical constraints | `../why/SKILL.md` |
 | Change boundaries, ownership, or domain structure | `../architect/SKILL.md` |
-| Partition a large investigation or review | `../swarm/SKILL.md` |
+| Partition a large bounded read-only investigation or review | `../swarm/SKILL.md` |
+| Operate Herdr workspaces, tabs, panes, or individual agents | `../pstack-herdr/SKILL.md` |
+| Launch or coordinate Herdr writing agents or an agent swarm | `../pstack-herdr-swarm/SKILL.md` |
 | Compare competing design sketches | `../arena/SKILL.md` |
 | Challenge a consequential design or implementation | `../interrogate/SKILL.md` |
 | Assess effects beyond a diff | `../blast-radius/SKILL.md` |
@@ -35,7 +37,9 @@ Load each applicable skill by reading its SKILL.md relative to this directory. D
 | Write user-facing prose | `../unslop/SKILL.md` |
 | Learn from a completed task | `../reflect/SKILL.md` |
 
-Use the smallest useful workflow. Do not turn a trivial edit into an expensive panel. `pstack_review` supplies read-only explorers, reviewers, and designers. The parent performs implementation and runtime verification. Submit a bounded brief and source pointers, not the entire conversation. Identify the actual models used and incomplete reviews. Never present same-model runs as multi-model agreement.
+Use the smallest useful workflow. Do not turn a trivial edit into an expensive panel. `pstack_review` supplies bounded read-only explorers, reviewers, and designers; it remains separate from persistent Herdr agents. The parent performs implementation and runtime verification. Submit a bounded brief and source pointers, not the entire conversation. Identify the actual models used and incomplete reviews. Never present same-model runs as multi-model agreement.
+
+Herdr support is explicit-only and requires an externally installed Herdr in a managed pane. Route direct pane/workspace control to `pstack-herdr` and any Herdr writing or agent-swarm request to `pstack-herdr-swarm`. Do not silently substitute a write-capable persistent agent for `pstack_review`, or claim that panes and worktrees are an OS sandbox.
 
 ## Ground decisions in principles
 

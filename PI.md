@@ -6,7 +6,7 @@ This is a scoped, independent pstack port for Pi 1.0.4 (`@earendil-works/pi-codi
 
 A loaded skill lives at `<package>/skills/<name>/SKILL.md`. Resolve supporting files relative to that skill, not the project. Invoke `/skill:<name>`. Skills are explicit-only to avoid changing unrelated tasks just by installing the package. Once loaded, a workflow may read another bundled skill directly.
 
-`/pstack on` enables the poteto routing instructions on every subsequent turn. `/pstack off` removes that extension-provided instruction section on the next turn; it cannot erase prior conversation or override another instruction. Mode follows the active session branch through resume, reload, compaction, and tree navigation. New sessions start off unless explicitly launched with `--pstack`. Installation does not edit AGENTS.md or enable a global mode.
+`/pstack on` enables the poteto routing instructions on every subsequent turn. `/pstack off` removes that extension-provided instruction section on the next turn; it cannot erase prior conversation or override another instruction. Mode follows the active session branch through resume, reload, compaction, and tree navigation. New sessions start off unless explicitly launched with `--pstack`. Installation does not edit AGENTS.md or enable a global mode. `/pstack herdr` only reads this process's Herdr environment marker and caller IDs; it does not start a process or inspect another session.
 
 ## Delegation
 
@@ -38,12 +38,20 @@ Optional role preferences live at `<agent-dir>/pstack-models.json`. The default 
 
 Task-level fields override role fields. `auto` and `inherit-parent` select the parent model. An explicit `thinking` preference still applies. Invalid config or unavailable explicit models stop the whole batch before spawning. To run a multi-model panel, set a different verified model on each task. Same-model independent runs are useful but are not model diversity. Delegation incurs ordinary provider costs; timeouts and concurrency limits are not dollar budgets.
 
+## Herdr integration
+
+The explicit [`pstack-herdr`](skills/pstack-herdr/SKILL.md) skill covers direct workspace, tab, pane, and agent operations. The explicit [`pstack-herdr-swarm`](skills/pstack-herdr-swarm/SKILL.md) skill covers persistent agent swarms and writing agents, normally with isolated Git worktrees for concurrent writers. Poteto mode routes explicit Herdr requests to those skills; installation and ordinary mode do not activate them.
+
+These workflows control an externally installed Herdr. Before any control they require `HERDR_ENV=1`, use the caller's workspace/tab/pane IDs, and inspect the installed CLI help as the authority for its command surface. Pstack does not bundle Herdr, install or update Herdr or its integrations, or guarantee a particular Herdr CLI version.
+
+Herdr agents are not `pstack_review` children. `pstack_review` remains an awaited, bounded, read-only panel with no bash, writes, MCP, or recursive delegation. A user-authorized Herdr agent may instead persist, run commands, and write in its assigned checkout. Its pane or Git worktree isolates coordination and source changes, not operating-system access.
+
 ## Permissions and external effects
 
-This package is not an OS sandbox. Children inherit normal user credentials and environment. Disabling extensions, MCP, project configuration, context-file discovery, and write tools reduces capabilities but does not restrict which files the remaining read tools can read. User-level `models.json` credential commands may execute during authentication. Use an isolated OS environment for untrusted repositories or sensitive reviews.
+This package is not an OS sandbox. Review children and externally launched Herdr agents inherit normal user credentials and environment. Disabling extensions, MCP, project configuration, context-file discovery, and write tools reduces review-child capabilities but does not restrict which files the remaining read tools can read. Herdr panes and Git worktrees do not restrict filesystem, network, credential, or process access. User-level `models.json` credential commands may execute during authentication. Use an isolated OS environment for untrusted repositories or sensitive reviews.
 
 A workflow is not permission to publish, merge, deploy, send messages, delete data, or broaden a task. Follow the user's scope and existing approval requirements. Ask before external writes unless the user has explicitly authorized them. Preserve uncertain constraint comments and safety suppressions until their purpose is understood.
 
 ## Unsupported runtime features
 
-No cloud workers, write-enabled subagents, scheduled wakeups, heartbeat service, bot bridge, or Benny integration are included. No MCP server or browser is installed. Use available host tools only when present and authorized. Never emulate durable scheduling with detached sleepers or promise future execution. For a pause, save a user-approved resume note with objective, evidence, changes, remaining work, and commands to rerun. Resume explicitly with Pi's session tools.
+No cloud-worker runtime, built-in scheduled wakeups, heartbeat service, bot bridge, or Benny integration is included. Pstack's Herdr skills can coordinate write-enabled external agents when explicitly requested, but they do not bundle that runtime or create an unattended pstack scheduler. No MCP server or browser is installed. Use available host tools only when present and authorized. Never emulate durable scheduling with detached sleepers or promise future execution. For a pause, save a user-approved resume note with objective, evidence, changes, remaining work, and commands to rerun. Resume explicitly with Pi's session tools.

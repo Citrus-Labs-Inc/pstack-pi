@@ -97,6 +97,40 @@ test("unknown commands do not toggle mode; non-UI status does not require a dial
   await h.command("status");
   assert.match(h.notifications.at(-1)!, /off/);
 });
+test("herdr status reads only the managed environment and works without UI", async () => {
+  const keys = ["HERDR_ENV", "HERDR_WORKSPACE_ID", "HERDR_TAB_ID", "HERDR_PANE_ID"] as const;
+  const saved = Object.fromEntries(keys.map(key => [key, process.env[key]]));
+  const h = harness();
+  try {
+    await h.command("help");
+    assert.match(h.notifications.at(-1)!, /\/pstack herdr/);
+    assert.match(h.notifications.at(-1)!, /\/skill:pstack-herdr-swarm/);
+
+    for (const key of keys) delete process.env[key];
+    Object.assign(h.ctx, { hasUI: false, ui: undefined });
+    await h.command("herdr");
+    assert.equal(h.notifications.at(-1), "Herdr: unmanaged (HERDR_ENV is not 1). No Herdr session was inspected.");
+
+    Object.assign(process.env, {
+      HERDR_ENV: "1",
+      HERDR_WORKSPACE_ID: "w-test",
+      HERDR_TAB_ID: "w-test:t2",
+      HERDR_PANE_ID: "w-test:p3",
+    });
+    await h.command("herdr");
+    assert.equal(h.notifications.at(-1), [
+      "Herdr: managed (HERDR_ENV=1).",
+      "HERDR_WORKSPACE_ID=w-test",
+      "HERDR_TAB_ID=w-test:t2",
+      "HERDR_PANE_ID=w-test:p3",
+    ].join("\n"));
+  } finally {
+    for (const key of keys) {
+      if (saved[key] === undefined) delete process.env[key];
+      else process.env[key] = saved[key];
+    }
+  }
+});
 test("review tool returns partial failures, real usage, and private reports", { skip: process.platform === "win32" }, async () => {
   const dir = await mkdtemp(join(tmpdir(), "pstack-tool-test-"));
   const executable = join(dir, "fake-pi");

@@ -16,13 +16,13 @@ async function markdownFiles(dir: string): Promise<string[]> {
   }
   return files;
 }
-test("Pi discovers all 41 explicit-only skills without diagnostics", () => {
+test("Pi discovers all 43 explicit-only skills without diagnostics", () => {
   const result = loadSkillsFromDir({ dir: join(root, "skills"), source: "test" });
   assert.deepEqual(result.diagnostics, []);
-  assert.equal(result.skills.length, 41);
+  assert.equal(result.skills.length, 43);
   assert.equal(result.skills.filter(skill => skill.name.startsWith("principle-")).length, 24);
   assert.ok(result.skills.every(skill => skill.disableModelInvocation));
-  assert.equal(new Set(result.skills.map(skill => skill.name)).size, 41);
+  assert.equal(new Set(result.skills.map(skill => skill.name)).size, 43);
 });
 test("all relative Markdown links resolve and shipped skills have no Codex runtime residue", async () => {
   for (const path of await markdownFiles(root)) {
