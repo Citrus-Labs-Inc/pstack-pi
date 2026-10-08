@@ -109,6 +109,8 @@ herdr pane read "$PANE_ID" --source recent-unwrapped --lines 120
 
 ## Start and coordinate agents
 
+Use this workflow for agent lifecycle control, inspection, and tasks that will not edit files. If a requested task may write or commit, stop and load [`pstack-herdr-swarm`](../pstack-herdr-swarm/SKILL.md); its checkout, worktree, verification, and integration rules are mandatory. Do not dispatch file-writing work into the caller's or another shared checkout through this direct-control workflow.
+
 Agent targets are unique live names or pane IDs currently hosting agents, not terminal IDs or agent-kind labels. Names must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents.
 
 Before `agent start`, verify that the target pane is at an interactive shell prompt with no foreground command, editor, or agent. Use the agent kind the user requested and inspect `herdr agent` for the installed kind list. Do not assume a provider, model, kind, or native argument. Pass requested native arguments only after `--`:
@@ -153,7 +155,7 @@ Choose the narrowest useful source:
 - `recent-unwrapped`: soft wraps joined; prefer for logs and transcripts.
 - `detection`: agent detection snapshot; available through `agent read`, not `pane read`.
 
-Use text output unless ANSI styling is evidence, then request `--format ansi`. Increasing `--lines` can retrieve available screen and host scrollback, but alternate-screen content may be unavailable. If a larger agent read still cannot recover a completed response, obtain the user's approval for a temporary filesystem write, then ask the agent to write the complete response to a temporary Markdown file and return only that path. Read the file on the same machine. Use this only as a fallback.
+Use text output unless ANSI styling is evidence, then request `--format ansi`. Increasing `--lines` can retrieve available screen and host scrollback, but alternate-screen content may be unavailable. If a larger read still cannot recover a completed response, ask the agent for numbered chunks and read each chunk before requesting the next. Do not create a file as an output-recovery shortcut; any file-writing assignment belongs in the swarm workflow.
 
 ## Preserve safety and focus
 

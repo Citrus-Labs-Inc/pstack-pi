@@ -9,7 +9,7 @@ compatibility: Requires a Herdr-managed pane plus herdr, pi, git, and jq on PATH
 
 Read [the Pi runtime contract](../../PI.md), [the Herdr CLI compatibility guide](references/cli-compatibility.md), and [the worker prompt contract](references/worker-prompt.md) before creating anything.
 
-Use this skill only after the user invokes `/skill:pstack-herdr-swarm`. Do not infer permission to use Herdr or start agents from a request to work in parallel.
+Use this skill only when the user explicitly requests Herdr, asks for a Herdr-managed herd/swarm, or invokes `/skill:pstack-herdr-swarm`. A generic request to work in parallel does not authorize Herdr control or agent startup.
 
 ## Choose the swarm type
 
@@ -27,29 +27,33 @@ A review agent may inspect a writer's worktree after that writer has stopped edi
    ```bash
    test "${HERDR_ENV:-}" = 1 || exit 1
    command -v herdr pi git jq >/dev/null || exit 1
-   git rev-parse --show-toplevel >/dev/null || exit 1
    ```
 
-   If `HERDR_ENV` is not `1`, stop. Do not control another Herdr session from outside Herdr.
+   If `HERDR_ENV` is not `1`, stop. Do not control another Herdr session from outside Herdr. Resolve `target_path` from a repository path named by the user, otherwise use the current directory. Then resolve the repository explicitly:
+
+   ```bash
+   repo=$(git -C "$target_path" rev-parse --show-toplevel) || exit 1
+   ```
+
+   Use `git -C "$repo"` for every source-repository query; do not silently substitute the orchestrator's current checkout when the user named another repository.
 
 2. Discover the installed Herdr commands on every run. The installed binary is authoritative. Follow the compatibility guide instead of copying commands from an earlier run. Never run bare `herdr`, because that can open the TUI.
 
 3. Confirm that the installed groups advertise structured workspace and agent lists. Then inspect the current state before choosing names or paths:
 
    ```bash
-   git status --short --branch || exit 1
-   git worktree list --porcelain || exit 1
+   git -C "$repo" status --short --branch || exit 1
+   git -C "$repo" worktree list --porcelain || exit 1
    herdr workspace list || exit 1
    herdr agent list || exit 1
    ```
 
-   Run `herdr worktree list` and `herdr integration status` only in forms advertised by the installed command groups. Stop if a required structured list or lookup is absent. Do not install, enable, or change an integration.
+   Run `herdr worktree list` only in a form advertised by the installed command group and only for writing or integration lanes. Stop if a required structured list or lookup is absent. Do not install, enable, or change a Herdr integration.
 
 4. Record one immutable base for all writing lanes:
 
    ```bash
-   repo=$(git rev-parse --show-toplevel) || exit 1
-   base_sha=$(git rev-parse HEAD) || exit 1
+   base_sha=$(git -C "$repo" rev-parse HEAD) || exit 1
    ```
 
 5. Handle the checkout state explicitly:
@@ -57,9 +61,9 @@ A review agent may inspect a writer's worktree after that writer has stopped edi
    - If writers do not need uncommitted files, branch every worktree from `base_sha` and leave the dirty checkout untouched.
    - If writers need uncommitted files, stop and ask how the user wants to preserve them. A linked worktree does not contain uncommitted changes.
    - Never commit, stash, copy, discard, or reset the user's changes to prepare a swarm.
-   - A review swarm may read a dirty checkout only if the checkout stays unchanged. Otherwise save the complete relevant diff and untracked inputs as an immutable artifact, or use a review-only worktree at a recorded commit. Include that boundary in every review prompt.
+   - Never let a review swarm read a dirty checkout directly. Save the complete relevant diff, history, and requested untracked inputs as one immutable read-only artifact outside the checkout, and give reviewers a clean review-only worktree at the recorded `HEAD`. Give every reviewer the same artifact path and boundary.
 
-6. If the user specified a Pi provider and model, verify the exact `provider/model-id` and pass both exact values to every requested worker. Pass a thinking argument only if the user specified one. Do not substitute another model. If the user did not specify a provider or model, pass no provider, model, or thinking arguments. Each Pi process then uses its normal configuration. The compatibility guide defines the check and argument construction.
+6. Launch every worker with Pi's `--no-approve` so project-local resources in its checkout cannot run before the lane prompt; preserve the user's Herdr integration. If the user specified a Pi provider and model, verify the exact `provider/model-id` and pass both exact values to every requested worker. Pass a thinking argument only if the user specified one. Do not substitute another model. If the user did not specify a provider or model, pass no provider, model, or thinking arguments. Each Pi process then uses its normal model configuration. The compatibility guide defines the check and argument construction.
 
 ## Split the objective into lanes
 
@@ -78,11 +82,13 @@ Check agent names, branch names, and worktree paths for conflicts. Agent names m
 
 ## Create the topology
 
-For a review swarm, create the requested panes or workspaces with the stable checkout as their working directory. Use explicit returned IDs and a creation command that guarantees no focus change.
+For a review swarm, follow [`pstack-herdr`](../pstack-herdr/SKILL.md) for topology operations. If the user did not request a layout, create one background workspace per reviewer, rooted at a clean checkout, using a verified non-focusing form. Parse and record each returned workspace and root-pane ID. Record the checkout's `HEAD` and porcelain status before dispatch and re-check both after each reviewer; if either changes, mark that review unverified. Prefer a review-only worktree at the recorded commit when the user may keep editing.
+
+For a change review, generate the exact diff and relevant history before dispatch, save them as one artifact outside any changing checkout, record its `git hash-object --no-filters` digest, and give every reviewer its absolute path and digest. Re-check the digest after the reviews. A commit-range label alone is insufficient because restricted reviewers cannot run Git.
 
 For a writing swarm, create linked worktrees **sequentially** because Git worktree creation changes shared repository metadata. For each lane:
 
-1. create the worktree from the same `base_sha` with a unique branch and `--no-focus` when supported;
+1. create the worktree from the same `base_sha` with a unique branch using a verified non-focusing form; stop before creation if the installed CLI cannot preserve focus;
 2. capture the JSON response;
 3. parse the workspace ID, root pane ID, worktree path, and branch with checked `jq -e` calls;
 4. reject a missing, null, or empty value; and
@@ -94,13 +100,13 @@ Do not predict an ID, derive an ID from display order, or blindly retry a failed
 
 Use the command form detected during preflight. Start Pi in each assigned pane or worktree. Preserve the user's focus for every start and prompt. If the detected commands cannot pass required Pi arguments or guarantee no focus change, stop before creating resources.
 
-For every review worker, use Pi's advertised equivalents of `--tools read,grep,find,ls --no-extensions --no-mcp`. If the installed Pi cannot remove write, shell, extension, custom, and MCP tools, do not share a checkout. Use an OS-level read-only copy or stop. A prompt prohibition alone does not make an agent read-only.
+For every review worker, use all review restrictions defined by the compatibility guide, including `--tools read,grep,find,ls`, disabled extensions and MCP, and disabled project-controlled resources. If the installed Pi cannot remove write, shell, extension, custom, and MCP tools, do not share a checkout. Use an OS-enforced read-only mount or isolated environment that cannot reach the mutable original, otherwise stop. An ordinary copy, filesystem mode change, or prompt prohibition is not an access control.
 
 Build each prompt from the worker prompt contract. Include the absolute checkout path, the branch, the shared base commit, ownership, exclusions, checks, and completion evidence. Do not include secrets or unrelated conversation history.
 
 Start all agents and submit all initial prompts before any long wait. A sequential worktree setup does not justify serial worker execution. If startup or prompt submission fails, inspect the live agent and pane before retrying. A timeout does not prove that the process or turn stopped.
 
-If the user asked only to start the swarm, report each agent name, branch, worktree path, and goal after dispatch. Do not wait for completion unless requested.
+If the user asked only to start the swarm, report each lane's agent name, workspace ID, pane ID, checkout path, goal, and—when applicable—branch and review artifact. Do not wait for completion unless requested.
 
 ## Monitor lifecycle without assuming success
 
@@ -116,14 +122,15 @@ For each agent:
 
 The states `blocked`, `unknown`, `idle`, and `done` are observations. None proves correctness. Do not answer approval, credential, deployment, destructive Git, or external-side-effect questions without the user's authorization. Do not resend a timed-out prompt until inspection proves that the original turn is no longer running.
 
-Use read commands rather than focus commands. CLI reads preserve which pane the user is viewing.
+If alternate-screen loss truncates a restricted reviewer's response, ask it for numbered chunks and read each chunk before requesting the next. It has no write tool, so do not use the temporary-file fallback. Use read commands rather than focus commands; CLI reads preserve which pane the user is viewing.
 
 ## Verify each lane
 
 Do not rely on a worker's summary. For each writing worktree, inspect at least:
 
 ```bash
-test -z "$(git -C "$worktree_path" status --porcelain)" || exit 1
+worktree_status=$(git -C "$worktree_path" status --porcelain) || exit 1
+test -z "$worktree_status" || exit 1
 test "$(git -C "$worktree_path" branch --show-current)" = "$expected_branch" || exit 1
 git -C "$worktree_path" merge-base --is-ancestor "$base_sha" HEAD || exit 1
 lane_commits=$(git -C "$worktree_path" rev-list --reverse "$base_sha"..HEAD) || exit 1
@@ -138,21 +145,23 @@ Mark every lane as passed, failed, blocked, or unverified. Do not call partial r
 
 ## Integrate verified commits
 
-Decide the integration branch and record its target SHA before changing it. Do not mutate a dirty user checkout. Re-check the target immediately before integration. If it moved, stop and decide how to handle the drift.
+Integration requires explicit scope. If the user requested only startup, lanes, or review, stop after reporting verified commits. For an explicit end-to-end integration request, choose a unique integration branch/worktree, record its target SHA, and use the same validated worktree-creation procedure as a writing lane. Mutating the user's original branch requires separate explicit authorization. Do not mutate a dirty user checkout. Re-check the target immediately before integration; if it moved, stop and decide how to handle the drift.
 
-For nontrivial integration, create a separate integration worktree from the recorded target SHA. Confirm that `base_sha` is an ancestor of that target, then cherry-pick every verified lane commit in its recorded order. Normal cherry-picks create the integration history, so do not add an empty summary commit. If two lanes changed overlapping code unexpectedly, stop automatic integration and choose or ask for a merge strategy. Resolve interface conflicts deliberately, run lane checks plus cross-cutting checks, and inspect the combined diff.
+Confirm that `base_sha` is an ancestor of the recorded target, then cherry-pick every verified lane commit in its recorded order. Normal cherry-picks create the integration history, so do not add an empty summary commit. If two lanes changed overlapping code unexpectedly, stop automatic integration and choose or ask for a merge strategy. Resolve interface conflicts deliberately, run lane checks plus cross-cutting checks, and inspect the combined diff.
 
 An integration agent is not a trust boundary. Independently inspect its conflicts, diff, checks, and final tip SHA. Do not claim that the user's original branch contains the result unless Git proves that it does.
 
 ## Report and leave resources intact
 
-Report:
+Report every lane, including partially created or failed lanes, with:
 
-- each lane's outcome;
-- each agent name, branch, worktree path, and commit SHA;
+- outcome and goal;
+- agent name, workspace ID, pane ID, and checkout path;
+- branch and ordered commit SHAs when applicable;
+- immutable review boundary and artifact path when applicable;
 - checks run and exact failures;
-- the integration branch, path, and commit;
+- integration branch, path, and commit when integration was authorized;
 - whether the user's original branch changed; and
 - unresolved risks or decisions.
 
-Do not close panes or workspaces, stop agents, remove worktrees, delete branches, or clean temporary state unless the user asks. If the user requests cleanup, re-query every swarm-owned ID and path, stop only those agents, require clean worktrees, and remove them without force. Delete branches only with separate explicit authorization.
+Do not close panes or workspaces, stop agents, remove worktrees, delete branches, or clean temporary state unless the user asks. If the user requests cleanup, re-query every recorded swarm-owned ID and path, stop only those agents, require clean worktrees, and remove them without force. Delete branches only with separate explicit authorization.

@@ -47,13 +47,15 @@ Use the absolute path and actual branch from parsed Herdr output. Include the sa
 ```text
 You are read-only reviewer <agent-name> in a parallel Herdr run.
 
-Checkout: <absolute-path>
-Review boundary: <commit range, immutable saved diff, or stable checkout state>
+Checkout: <absolute-path at a recorded commit, or an unchanged clean checkout>
+Review boundary: <recorded commit or snapshot identity>
+Immutable change artifact: <absolute path and recorded git-hash-object digest, or "not applicable" for a source snapshot review>
 
 Question
 <one bounded review question or risk lens>
 
 Evidence
+- For a change review, read the immutable artifact first; it contains the exact diff and relevant history because this worker cannot run Git.
 - Inspect: <specific paths and symbols>
 - Report only actionable findings with severity, file and line evidence, impact, and a proposed fix.
 - State what you checked and what you could not check.
@@ -64,7 +66,7 @@ Constraints
 - Do not deploy, publish, push, alter credentials, or approve external actions.
 ```
 
-Several reviewers may share a checkout only while their Pi processes lack write, shell, extension, custom, and MCP tools and the checkout stays unchanged. If files may change, give each reviewer the same immutable artifact or a review-only worktree at a recorded commit.
+Several reviewers may share a clean checkout only while their Pi processes lack write, shell, extension, custom, and MCP tools and the checkout stays unchanged. Every change review receives the same orchestrator-generated immutable diff/history artifact. A dirty checkout is never shared directly; use its saved artifact together with a clean review-only worktree at the recorded `HEAD`.
 
 ## Integration lane template
 

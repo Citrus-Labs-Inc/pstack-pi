@@ -24,8 +24,8 @@ Load each applicable skill by reading its SKILL.md relative to this directory. D
 | Explain motivation or historical constraints | `../why/SKILL.md` |
 | Change boundaries, ownership, or domain structure | `../architect/SKILL.md` |
 | Partition a large bounded read-only investigation or review | `../swarm/SKILL.md` |
-| Operate Herdr workspaces, tabs, panes, or individual agents | `../pstack-herdr/SKILL.md` |
-| Launch or coordinate Herdr writing agents or an agent swarm | `../pstack-herdr-swarm/SKILL.md` |
+| Operate Herdr layout or inspect/control an agent without assigning file-writing work | `../pstack-herdr/SKILL.md` |
+| Launch or coordinate Herdr writing agents or any multi-agent swarm | `../pstack-herdr-swarm/SKILL.md` |
 | Compare competing design sketches | `../arena/SKILL.md` |
 | Challenge a consequential design or implementation | `../interrogate/SKILL.md` |
 | Assess effects beyond a diff | `../blast-radius/SKILL.md` |
