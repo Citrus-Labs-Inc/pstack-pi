@@ -2,7 +2,7 @@
 
 An independent Pi-native adaptation of [ScriptedAlchemy/pstack-codex](https://github.com/ScriptedAlchemy/pstack-codex), based on [Lauren Tan's pstack](https://github.com/cursor/plugins/tree/main/pstack).
 
-This first release includes **43 skills**, all **24 engineering principles**, session-branch poteto mode, bounded read-only review agents, and explicit integration workflows for an externally installed Herdr. It is a scoped port, not full upstream parity. See [coverage](PARITY.md) and the [runtime contract](PI.md).
+This first release includes **44 skills**, all **24 engineering principles**, session-branch poteto mode, bounded read-only review agents, and explicit integration workflows for an externally installed Herdr. It is a scoped port, not full upstream parity. See [coverage](PARITY.md) and the [runtime contract](PI.md).
 
 ## Install
 
@@ -40,6 +40,7 @@ Use `pi install --local /absolute/path/to/pstack-pi` for project-local installat
 | `/pstack herdr` | Report whether this process is in a Herdr-managed pane and show caller IDs |
 | `/skill:pstack-herdr <operation>` | Control an externally installed Herdr's workspaces, tabs, panes, or agents |
 | `/skill:pstack-herdr-swarm <task>` | Coordinate persistent Herdr agents, normally with isolated worktrees for writers |
+| `/skill:pstack-merge-pr <PR URL>` | Inspect and merge an authorized PR using authenticated `gh` |
 | `/skill:how <question>` | Understand code and ownership |
 | `/skill:why <question>` | Investigate historical motivation |
 | `/skill:architect <change>` | Compare structural designs |
@@ -87,6 +88,6 @@ Validation covers skill discovery and links, configuration, mode lifecycle, subp
 
 ## Attribution and scope
 
-MIT. Original copyright and license are retained. The source commit is pinned in [UPSTREAM.json](UPSTREAM.json). [NOTICE](NOTICE) describes attribution. `scripts/import-portable.mjs` reproduces the 30 lightly adapted skill imports; the 13 host-dependent workflows are maintained as native Pi implementations.
+MIT. Original copyright and license are retained. The source commit is pinned in [UPSTREAM.json](UPSTREAM.json). [NOTICE](NOTICE) describes attribution. `scripts/import-portable.mjs` reproduces the 30 lightly adapted skill imports; the 14 host-dependent workflows are maintained as native Pi implementations.
 
 Pstack does not provide its own unattended scheduler or writing-worker runtime. The explicit Herdr workflows can coordinate persistent external agents when requested, but upstream playbooks and executable helpers, Benny, the HTTP bot bridge, and session-history mining remain deferred. Nothing is published or globally installed by this checkout.

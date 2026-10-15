@@ -34,6 +34,7 @@ Load each applicable skill by reading its SKILL.md relative to this directory. D
 | Measure performance | `../benchmark-checklist/SKILL.md` |
 | Write TypeScript | `../typescript-best-practices/SKILL.md` |
 | Write docs, PR descriptions, or commit messages | `../technical-writing/SKILL.md` |
+| Merge an explicitly authorized GitHub PR | `../pstack-merge-pr/SKILL.md` |
 | Write user-facing prose | `../unslop/SKILL.md` |
 | Learn from a completed task | `../reflect/SKILL.md` |
 

@@ -52,6 +52,10 @@ This package is not an OS sandbox. Review children and externally launched Herdr
 
 A workflow is not permission to publish, merge, deploy, send messages, delete data, or broaden a task. Follow the user's scope and existing approval requirements. Ask before external writes unless the user has explicitly authorized them. Preserve uncertain constraint comments and safety suppressions until their purpose is understood.
 
+## GitHub PR merges
+
+Use `/skill:pstack-merge-pr` with an explicit repository and PR to inspect and merge through authenticated `gh`. The parent performs the merge, checks readiness, protects the reviewed head SHA, and verifies the resulting GitHub state. Installation or authentication alone does not authorize a merge. Review children remain read-only; no admin bypass, automatic branch deletion, or unattended monitoring is added.
+
 ## Unsupported runtime features
 
 No cloud-worker runtime, built-in scheduled wakeups, heartbeat service, bot bridge, or Benny integration is included. Pstack's Herdr skills can coordinate write-enabled external agents when explicitly requested, but they do not bundle that runtime or create an unattended pstack scheduler. No MCP server or browser is installed. Use available host tools only when present and authorized. Never emulate durable scheduling with detached sleepers or promise future execution. For a pause, save a user-approved resume note with objective, evidence, changes, remaining work, and commands to rerun. Resume explicitly with Pi's session tools.

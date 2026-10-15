@@ -12,11 +12,12 @@ Version 0.1.0 is a scoped Pi release, not a claim of complete Codex or Cursor pa
 | Bounded review delegation | `pstack_review`, Pi JSON subprocesses, exact model IDs, role preferences, bounded concurrency | Read-only, no parent transcript, no automatic cloud or worktree isolation |
 | Herdr control | Explicit `pstack-herdr` workflow for an externally installed Herdr | Pstack neither bundles Herdr nor installs or updates its integrations |
 | Herdr agent swarms | Explicit `pstack-herdr-swarm` workflow; isolated Git worktrees for concurrent writers | Persistent external agents, not `pstack_review`; no pinned CLI contract or OS sandbox |
+| GitHub PR merges | Explicit `pstack-merge-pr` skill using authenticated `gh` in the parent | Requires target authorization, readiness checks, and reviewed head-SHA protection; no admin bypass |
 | Persona instructions | Explorer, reviewer, designer, and read-only Comment Sicko | Does not install a writable poteto-agent or named custom-agent registry |
 | Model selection | Parent inheritance, exact task overrides, optional per-role JSON configuration | No invented model defaults, automatic model diversity, or spending caps |
 | Result evidence | Private temporary full reports, bounded summaries, model IDs, token/cost usage | Temporary artifacts are not a durable orchestration ledger |
 
-Total: **43 skill entry points**, including **24 principles**. Pi's own skill loader checks the count and metadata in `npm test`.
+Total: **44 skill entry points**, including **24 principles**. Pi's own skill loader checks the count and metadata in `npm test`.
 
 ## Deferred
 
